@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Calc Tool | BMI, EMI, GST, Percentage</title>
+    <!-- Importing a clean font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4F46E5; /* Indigo */
+            --primary-hover: #4338ca;
+            --secondary: #10B981; /* Emerald */
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --border-color: #E5E7EB;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Background Image Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Yahan par background image hai */
+            background-image: url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Scroll karte waqt photo fix rahegi */
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+            background-color: #f3f4f6; /* Fallback color agar image load na ho */
+        }
+
+        /* Glass Effect for Main Container to make text readable over image */
+        .calculator-container {
+            background: rgba(255, 255, 255, 0.92); /* White with 92% opacity */
+            backdrop-filter: blur(10px); /* Blur effect behind the card */
+            -webkit-backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 500px;
+            border-radius: var(--radius);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            min-height: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 4px rgba(255,255,255, 0.8);
+            background: rgba(255,255,255, 0.7);
+            padding: 1rem 2rem;
+            border-radius: var(--radius);
+            backdrop-filter: blur(5px);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            background-color: #f9fafb;
+            color: var(--primary);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Calculator Sections */
+        .calc-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .calc-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: rgba(255,255,255, 0.8);
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            background: #fff;
+        }
+
+        .unit-label {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
+
+        button.reset-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-decoration: underline;
+            cursor: pointer;
+            margin-top: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Result Area */
+        .result-box {
+            margin-top: 2rem;
+            padding: 1.25rem;
+            background-color: #F8FAFC;
+            border-radius: 8px;
+            border-left: 5px solid var(--secondary);
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.25rem;
+        }
+
+        .result-sub {
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+        
+        /* BMI Specific Visuals */
+        .bmi-gauge {
+            display: flex;
+            height: 10px;
+            width: 100%;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 1rem;
+            background: linear-gradient(to right, #3B82F6 0%, #3B82F6 18.4%, #10B981 18.4%, #10B981 49.9%, #F59E0B 49.9%, #F59E0B 69.9%, #EF4444 69.9%, #EF4444 100%);
+        }
+        
+        .bmi-marker {
+            width: 4px;
+            height: 16px;
+            background-color: var(--text-main);
+            position: relative;
+            top: -3px;
+            transform: translateX(-50%);
+            transition: left 0.5s ease;
+        }
+
+        .bmi-category-text {
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: block;
+            text-align: center;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .tabs {
+                border-radius: var(--radius);
+                padding: 0.25rem;
+            }
+            .tab-btn {
+                flex: 1 1 40%;
+                padding: 0.6rem;
+                font-size: 0.85rem;
+            }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Auto-Calculator Hub</h1>
+        <p class="subtitle">Results appear automatically as you type.</p>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs" id="tabNav">
+        <button class="tab-btn active" data-target="bmi">BMI Calculator</button>
+        <button class="tab-btn" data-target="emi">EMI Calculator</button>
+        <button class="tab-btn" data-target="gst">GST Calculator</button>
+        <button class="tab-btn" data-target="percentage">Percentage</button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="calculator-container">
+
+        <!-- BMI Calculator Section -->
+        <section id="bmi" class="calc-section active">
+            <h2>Body Mass Index (BMI)</h2>
+            <form id="bmiForm">
+                <div class="form-group">
+                    <label for="bmiGender">Gender</label>
+                    <select id="bmiGender">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bmiAge">Age</label>
+                    <input type="number" id="bmiAge" placeholder="e.g., 25" min="2" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="bmiHeight">Height</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="bmiHeight" placeholder="e.g., 175" min="50" max="300">
+                        <span class="unit-label">cm</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="bmiWeight">Weight</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="bmiWeight" placeholder="e.g., 70" min="20" max="300">
+                        <span class="unit-label">kg</span>
+                    </div>
+                </div>
+                <button type="button" class="reset-btn" onclick="resetForm('bmiForm', 'bmiResult')">Reset</button>
+            </form>
+
+            <div id="bmiResult" class="result-box">
+                <div class="result-title">Your BMI Score</div>
+                <div class="result-value" id="bmiValue">--</div>
+                <div class="result-sub">
+                    Status: <span id="bmiStatus" style="font-weight: bold;">--</span>
+                </div>
+                <!-- Visual Gauge -->
+                <div class="bmi-gauge">
+                    <div class="bmi-marker" id="bmiMarker" style="left: 0%;"></div>
+                </div>
+                <span class="bmi-category-text" id="bmiCategoryText">--</span>
+            </div>
+        </section>
+
+        <!-- EMI Calculator Section -->
+        <section id="emi" class="calc-section">
+            <h2>EMI Calculator</h2>
+            <form id="emiForm">
+                <div class="form-group">
+                    <label for="loanAmount">Loan Amount</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="loanAmount" placeholder="e.g., 100000" min="1000">
+                        <span class="unit-label">₹/$</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="interestRate">Interest Rate</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="interestRate" placeholder="e.g., 8.5" step="0.1" min="0.1">
+                        <span class="unit-label">%</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="loanTenure">Loan Tenure</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="loanTenure" placeholder="e.g., 5" min="1" max="30">
+                        <span class="unit-label">Years</span>
+                    </div>
+                </div>
+                <button type="button" class="reset-btn" onclick="resetForm('emiForm', 'emiResult')">Reset</button>
+            </form>
+
+            <div id="emiResult" class="result-box">
+                <div class="result-title">Monthly EMI</div>
+                <div class="result-value" id="emiValue">--</div>
+                <div class="result-sub">
+                    Total Interest: <span id="totalInterest">--</span>
+                </div>
+                <div class="result-sub" style="margin-top:0.5rem; font-size:0.85rem; color:var(--text-muted);">
+                    Total Payable Amount: <span id="totalAmount" style="font-weight:600; color:var(--text-main);">--</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- GST Calculator Section -->
+        <section id="gst" class="calc-section">
+            <h2>GST Calculator</h2>
+            <form id="gstForm">
+                <div class="form-group">
+                    <label for="gstMode">Calculation Mode</label>
+                    <select id="gstMode">
+                        <option value="exclusive">Add GST (Exclusive)</option>
+                        <option value="inclusive">Remove GST (Inclusive)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gstAmount">Initial Amount</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gstAmount" placeholder="e.g., 1000" min="1">
+                        <span class="unit-label">₹/$</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="gstRate">GST Tax Rate</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="gstRate" placeholder="e.g., 18" min="0" max="100">
+                        <span class="unit-label">%</span>
+                    </div>
+                </div>
+                <button type="button" class="reset-btn" onclick="resetForm('gstForm', 'gstResult')">Reset</button>
+            </form>
+
+            <div id="gstResult" class="result-box">
+                <div class="result-title">Net Amount</div>
+                <div class="result-value" id="gstNetAmount">--</div>
+                <div style="display: flex; justify-content: space-between; margin-top: 1rem; font-size: 0.9rem;">
+                    <div>
+                        <div class="result-title">GST Amount</div>
+                        <div style="font-weight:600;" id="gstComponent">--</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="result-title">Total Amount</div>
+                        <div style="font-weight:600; color:var(--primary);" id="gstTotalAmount">--</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Percentage Calculator Section -->
+        <section id="percentage" class="calc-section">
+            <h2>Percentage Calculator</h2>
+            <form id="percForm">
+                <div class="form-group">
+                    <label for="percMode">What do you want to calculate?</label>
+                    <select id="percMode" onchange="updatePercentageUI()">
+                        <option value="type1">Percentage of a number</option>
+                        <option value="type2">Percentage change</option>
+                        <option value="type3">Percentage difference</option>
+                    </select>
+                </div>
+
+                <!-- Type 1: Simple % of a number -->
+                <div id="percType1">
+                    <div class="form-group">
+                        <label for="percValue">What is</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="percValue" placeholder="e.g., 20" min="0">
+                            <span class="unit-label">%</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="percTotal">of</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="percTotal" placeholder="e.g., 1500" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Type 2: Percentage Change -->
+                <div id="percType2" style="display:none;">
+                    <div class="form-group">
+                        <label for="percOld">Original Value</label>
+                        <input type="number" id="percOld" placeholder="e.g., 50">
+                    </div>
+                    <div class="form-group">
+                        <label for="percNew">New Value</label>
+                        <input type="number" id="percNew" placeholder="e.g., 75">
+                    </div>
+                </div>
+                
+                <!-- Type 3: Fraction to Percentage -->
+                <div id="percType3" style="display:none;">
+                    <div class="form-group">
+                        <label for="fracPart">Part Value</label>
+                        <input type="number" id="fracPart" placeholder="e.g., 20">
+                    </div>
+                    <div class="form-group">
+                        <label for="fracWhole">Whole Value</label>
+                        <input type="number" id="fracWhole" placeholder="e.g., 50">
+                    </div>
+                </div>
+
+                <button type="button" class="reset-btn" onclick="resetForm('percForm', 'percResult')">Reset</button>
+            </form>
+
+            <div id="percResult" class="result-box">
+                <div class="result-title">Result</div>
+                <div class="result-value" id="percResultValue">--</div>
+                <div class="result-sub" id="percResultDesc"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p style="margin-top: 2rem; color: var(--text-muted); font-size: 0.8rem; background: rgba(255,255,255,0.6); padding: 0.5rem 1rem; border-radius: 8px;">
+            &copy; 2023 Auto-Calc Tool. No clicks required.
+        </p>
+    </footer>
+
+    <script>
+        // --- Tab Switching Logic ---
+        const tabs = document.querySelectorAll('.tab-btn');
+        const sections = document.querySelectorAll('.calc-section');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+
+                tab.classList.add('active');
+                const targetId = tab.getAttribute('data-target');
+                document.getElementById(targetId).classList.add('active');
+            });
+        });
+
+        // --- Reset Helper ---
+        function resetForm(formId, resultId) {
+            document.getElementById(formId).reset();
+            document.getElementById(resultId).classList.remove('show');
+            
+            // Specific resets
+            if(formId === 'bmiForm') {
+                document.getElementById('bmiMarker').style.left = '0%';
+            }
+            if(formId === 'percForm') {
+                updatePercentageUI();
+            }
+        }
+
+        // --- BMI Calculator Logic ---
+        function calculateBMI() {
+            const height = parseFloat(document.getElementById('bmiHeight').value);
+            const weight = parseFloat(document.getElementById('bmiWeight').value);
+            const resultBox = document.getElementById('bmiResult');
+            const bmiValEl = document.getElementById('bmiValue');
+            const bmiStatusEl = document.getElementById('bmiStatus');
+            const bmiMarker = document.getElementById('bmiMarker');
+            const bmiCatText = document.getElementById('bmiCategoryText');
+
+            if (!height || !weight || height <= 0 || weight <= 0) {
+                resultBox.classList.remove('show');
+                return;
+            }
+
+            const heightInMeters = height / 100;
+            const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+
+            let status = "";
+            let color = "";
+            let markerPos = 0;
+
+            if (bmi < 18.5) {
+                status = "Underweight";
+                color = "#3B82F6"; 
+                markerPos = Math.min((bmi / 18.4) * 18.4, 18.4); 
+            } else if (bmi >= 18.5 && bmi < 24.9) {
+                status = "Normal Weight";
+                color = "#10B981"; 
+                markerPos = 18.4 + ((bmi - 18.5) / (24.9 - 18.5)) * (49.9 - 18.4);
+            } else if (bmi >= 25 && bmi < 29.9) {
+                status = "Overweight";
+                color = "#F59E0B"; 
+                markerPos = 49.9 + ((bmi - 25) / (29.9 - 25)) * (69.9 - 49.9);
+            } else {
+                status = "Obese";
+                color = "#EF4444"; 
+                markerPos = 69.9 + ((bmi - 30) / (40 - 30)) * (100 - 69.9);
+                if (markerPos > 100) markerPos = 100;
+            }
+
+            bmiValEl.textContent = bmi;
+            bmiStatusEl.textContent = status;
+            bmiStatusEl.style.color = color;
+            bmiMarker.style.left = `${markerPos}%`;
+            bmiCatText.textContent = status;
+            bmiCatText.style.color = color;
+            resultBox.classList.add('show');
+        }
+
+        // --- EMI Calculator Logic ---
+        function calculateEMI() {
+            const P = parseFloat(document.getElementById('loanAmount').value);
+            const annualRate = parseFloat(document.getElementById('interestRate').value);
+            const years = parseFloat(document.getElementById('loanTenure').value);
+            const resultBox = document.getElementById('emiResult');
+
+            if (!P || !annualRate || !years || P <= 0 || annualRate <= 0 || years <= 0) {
+                resultBox.classList.remove('show');
+                return;
+            }
+
+            const r = annualRate / 12 / 100;
+            const n = years * 12;
+            const emi = (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            const totalPayable = emi * n;
+            const totalInterest = totalPayable - P;
+
+            document.getElementById('emiValue').textContent = formatMoney(emi);
+            document.getElementById('totalInterest').textContent = formatMoney(totalInterest);
+            document.getElementById('totalAmount').textContent = formatMoney(totalPayable);
+            resultBox.classList.add('show');
+        }
+
+        function formatMoney(num) {
+            return num.toLocaleString('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            });
+        }
+
+        // --- GST Calculator Logic ---
+        function calculateGST() {
+            const amount = parseFloat(document.getElementById('gstAmount').value);
+            const rate = parseFloat(document.getElementById('gstRate').value);
+            const mode = document.getElementById('gstMode').value;
+            const resultBox = document.getElementById('gstResult');
+
+            if (!amount || amount < 0 || isNaN(rate) || rate < 0) {
+                resultBox.classList.remove('show');
+                return;
+            }
+
+            let gstComponent = 0;
+            let netAmount = 0;
+            let totalAmount = 0;
+
+            if (mode === 'exclusive') {
+                gstComponent = (amount * (rate / 100));
+                netAmount = amount;
+                totalAmount = amount + gstComponent;
+            } else {
+                netAmount = amount / (1 + (rate / 100));
+                gstComponent = amount - netAmount;
+                totalAmount = amount;
+            }
+
+            document.getElementById('gstNetAmount').textContent = formatMoney(netAmount);
+            document.getElementById('gstComponent').textContent = formatMoney(gstComponent);
+            document.getElementById('gstTotalAmount').textContent = formatMoney(totalAmount);
+            resultBox.classList.add('show');
+        }
+
+        // --- Percentage Calculator Logic ---
+        function updatePercentageUI() {
+            const mode = document.getElementById('percMode').value;
+            document.getElementById('percType1').style.display = 'none';
+            document.getElementById('percType2').style.display = 'none';
+            document.getElementById('percType3').style.display = 'none';
+
+            if (mode === 'type1') document.getElementById('percType1').style.display = 'block';
+            if (mode === 'type2') document.getElementById('percType2').style.display = 'block';
+            if (mode === 'type3') document.getElementById('percType3').style.display = 'block';
+            
+            document.getElementById('percResult').classList.remove('show');
+        }
+
+        function calculatePercentage() {
+            const mode = document.getElementById('percMode').value;
+            let result = 0;
+            let desc = "";
+            let valid = true;
+
+            if (mode === 'type1') {
+                const percent = parseFloat(document.getElementById('percValue').value);
+                const total = parseFloat(document.getElementById('percTotal').value);
+                if (isNaN(percent) || isNaN(total)) valid = false;
+                else {
+                    result = (total * (percent / 100)).toFixed(2);
+                    desc = `${percent}% of ${total} is`;
+                }
+            } 
+            else if (mode === 'type2') {
+                const oldVal = parseFloat(document.getElementById('percOld').value);
+                const newVal = parseFloat(document.getElementById('percNew').value);
+                if (isNaN(oldVal) || isNaN(newVal) || oldVal === 0) valid = false;
+                else {
+                    const change = newVal - oldVal;
+                    result = ((change / oldVal) * 100).toFixed(2);
+                    const symbol = result > 0 ? "+" : "";
+                    desc = `Change from ${oldVal} to ${newVal}:`;
+                    result = `${symbol}${result}%`;
+                }
+            }
+            else if (mode === 'type3') {
+                const part = parseFloat(document.getElementById('fracPart').value);
+                const whole = parseFloat(document.getElementById('fracWhole').value);
+                if (isNaN(part) || isNaN(whole) || whole === 0) valid = false;
+                else {
+                    result = ((part / whole) * 100).toFixed(2);
+                    desc = `${part} is what percent of ${whole}?`;
+                    result = `${result}%`;
+                }
+            }
+
+            if (!valid) {
+                document.getElementById('percResult').classList.remove('show');
+                return;
+            }
+
+            document.getElementById('percResultValue').textContent = result;
+            document.getElementById('percResultDesc').textContent = desc;
+            document.getElementById('percResult').classList.add('show');
+        }
+
+        // --- Automatic Event Listeners Setup ---
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // BMI Listeners
+            ['bmiHeight', 'bmiWeight'].forEach(id => {
+                document.getElementById(id).addEventListener('input', calculateBMI);
+            });
+
+            // EMI Listeners
+            ['loanAmount', 'interestRate', 'loanTenure'].forEach(id => {
+                document.getElementById(id).addEventListener('input', calculateEMI);
+            });
+
+            // GST Listeners
+            ['gstAmount', 'gstRate'].forEach(id => {
+                document.getElementById(id).addEventListener('input', calculateGST);
+            });
+            document.getElementById('gstMode').addEventListener('change', calculateGST);
+
+            // Percentage Listeners
+            ['percValue', 'percTotal', 'percOld', 'percNew', 'fracPart', 'fracWhole'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.addEventListener('input', calculatePercentage);
+                }
+            });
+            document.getElementById('percMode').addEventListener('change', () => {
+                updatePercentageUI();
+                calculatePercentage();
+            });
+        });
+    </script>
+</body>
+</html>
